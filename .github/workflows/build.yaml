@@ -37,7 +37,7 @@ jobs:
       uses: PyO3/maturin-action@v1
       with:
         command: build
-        args: --release --sdist -o dist --universal2
+        args: --release --sdist -o dist
         target: ${{ matrix.target }}
 
     - name: List contents of dist directory
