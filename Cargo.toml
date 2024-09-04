@@ -1,6 +1,6 @@
 [package]
 name = "gtdb_tree"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "A library for parsing Newick format files, especially GTDB tree files."
 homepage = "https://github.com/eric9n/gtdb_tree"  # Replace with your actual GitHub URL
@@ -11,7 +11,8 @@ authors = ["Your Name <your.email@example.com>"]  # Replace with your actual nam
 
 [lib]
 name = "gtdb_tree"
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "lib"]
+
 
 [dependencies]
 memchr = "2.7.4"

@@ -41,8 +41,6 @@ A Python package for parsing GTDB trees using Rust.
 pip install gtdb_tree
 ```
 
-## Usage
-
 ```python
 import gtdb_tree
 
