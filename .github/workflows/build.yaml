@@ -25,22 +25,6 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Build wheels
-        uses: PyO3/maturin-action@v1
-        with:
-          args: --release --out dist
-          sccache: 'true'
-          manylinux: auto
-        env:
-          MACOSX_DEPLOYMENT_TARGET: '10.9'
-
-      - name: Build universal wheel
-        if: matrix.os == 'ubuntu-latest'
-        uses: PyO3/maturin-action@v1
-        with:
-          args: --release --out dist --compatibility manylinux2014 --find-interpreter
-          sccache: 'true'
-
       - name: Build sdist
         if: matrix.os == 'ubuntu-latest'
         uses: PyO3/maturin-action@v1
