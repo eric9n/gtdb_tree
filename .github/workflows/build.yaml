@@ -38,17 +38,17 @@ jobs:
           target: ${{ matrix.target }}
           args: --release --out dist
 
-      # - name: Install auditwheel
-      #   if: runner.os == 'Linux'
-      #   run: pip install auditwheel
+      - name: Install auditwheel
+        if: runner.os == 'Linux'
+        run: pip install auditwheel
 
-      # - name: Repair wheels
-      #   if: runner.os == 'Linux'
-      #   run: |
-      #     for whl in dist/*.whl; do
-      #       auditwheel repair "$whl" --plat manylinux_2_28_x86_64 -w ./dist/
-      #       rm $whl
-      #     done
+      - name: Repair wheels
+        if: runner.os == 'Linux'
+        run: |
+          for whl in dist/*.whl; do
+            auditwheel repair "$whl" --plat manylinux_2_28_x86_64 -w ./dist/
+            rm $whl
+          done
 
       - uses: actions/upload-artifact@v2
         with:
