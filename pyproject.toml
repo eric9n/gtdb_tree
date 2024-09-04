@@ -4,8 +4,6 @@ build-backend = "maturin"
 
 
 [tool.maturin]
-# bindings = "cffi"
-# features = ["pyo3/extension-module"]
 bindings = "pyo3"
 compatibility = "manylinux2014"
 features = ["python"]
