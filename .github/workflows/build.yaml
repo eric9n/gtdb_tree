@@ -14,8 +14,17 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: [3.7, 3.8, 3.9, '3.10', '3.11']
+        include:
+          # Ubuntu builds
+          - os: ubuntu-latest
+            python-version: [3.7, 3.8, 3.9, '3.10', '3.11']
+          # macOS builds
+          - os: macos-latest
+            python-version: [3.8, 3.9, '3.10', '3.11']
+          # Windows builds
+          - os: windows-latest
+            python-version: [3.7, 3.8, 3.9, '3.10', '3.11']
+      fail-fast: false  # 允许部分失败
 
     steps:
     - uses: actions/checkout@v2
