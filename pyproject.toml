@@ -2,9 +2,10 @@
 requires = ["maturin>=1.0,<2.0"]
 build-backend = "maturin"
 
+
 [tool.maturin]
-bindings = "cffi"
-compatibility = "linux"
+features = ["pyo3/extension-module"]
+compatibility = "manylinux2014"
 
 [project]
 name = "gtdb_tree"
