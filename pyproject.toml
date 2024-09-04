@@ -5,7 +5,7 @@ build-backend = "maturin"
 
 [tool.maturin]
 bindings = "pyo3"
-compatibility = "manylinux2014"
+compatibility = "manylinux_2_28"
 features = ["python"]
 
 [project]
