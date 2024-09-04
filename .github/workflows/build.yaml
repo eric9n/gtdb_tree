@@ -28,7 +28,7 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
-          args: --release --out dist --target ${{ matrix.target }} --find-interpreter
+          args: --release --out dist
           sccache: 'true'
           manylinux: auto
         env:
