@@ -20,7 +20,7 @@ dependencies = [
     "setuptools-rust>=1.5.2",
     "cffi"
 ]
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 
 [project.urls]
 Homepage = "https://github.com/eric9n/gtdb_tree"
