@@ -9,7 +9,7 @@ features = ["python"]
 
 [project]
 name = "gtdb_tree"
-version = "0.1.7"
+version = "0.1.8"
 description = "A Python package for parsing GTDB trees using Rust"
 readme = "README.md"
 authors = [{ name = "dagou", email = "eric9n@gmail.com" }]
@@ -22,8 +22,7 @@ classifiers = [
 ]
 keywords = ["gtdb", "tree", "parser", "rust"]
 dependencies = [
-    "setuptools-rust>=1.5.2",
-    "cffi"
+    "setuptools-rust>=1.5.2"
 ]
 requires-python = ">=3.8"
 

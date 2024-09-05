@@ -6,12 +6,12 @@
 /// * `name` - The name of the node.
 /// * `length` - The length of the branch leading to this node.
 /// * `parent` - The identifier of the parent node.
-/// * `bootstrap` - The bootstrap value of the node. 0-100
+/// * `bootstrap` - The bootstrap value of the node. 0.0-100.0
 #[derive(Debug, PartialEq, Clone)]
 pub struct Node {
     pub id: usize,
     pub name: String,
-    pub bootstrap: u32,
+    pub bootstrap: f64,
     pub length: f64,
     pub parent: usize,
 }

@@ -24,7 +24,7 @@ impl Node {
     }
 
     #[getter]
-    fn bootstrap(&self) -> PyResult<u32> {
+    fn bootstrap(&self) -> PyResult<f64> {
         Ok(self.node.bootstrap)
     }
 

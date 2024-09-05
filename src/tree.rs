@@ -1,27 +1,27 @@
 use crate::node::{Node, ParseError};
 use memchr::memchr2;
 
-fn parse_label(label: &str) -> Result<(String, u32), ParseError> {
+fn parse_label(label: &str) -> Result<(String, f64), ParseError> {
     let label = label.trim_end_matches(";").trim_matches('\'').to_string();
 
     let parts: Vec<&str> = label.splitn(2, ':').collect();
     if parts.len() == 1 {
-        let label_u32 = label.parse::<u32>();
-        if let Ok(bootstrap) = label_u32 {
-            if bootstrap <= 100 {
+        let label_f64 = label.parse::<f64>();
+        if let Ok(bootstrap) = label_f64 {
+            if bootstrap <= 100.1 {
                 return Ok(("".into(), bootstrap));
             }
         }
-        return Ok((label, 0));
+        return Ok((label, 0.0));
     }
-    let parts_0_u32 = parts.get(0).unwrap_or(&"0").parse::<u32>();
+    let parts_0_f64 = parts.get(0).unwrap_or(&"0").parse::<f64>();
     let name = parts.get(1).unwrap_or(&"").to_string();
-    if let Ok(bootstrap) = parts_0_u32 {
-        if bootstrap <= 100 {
+    if let Ok(bootstrap) = parts_0_f64 {
+        if bootstrap <= 100.1 {
             return Ok((name, bootstrap));
         }
     }
-    Ok((label, 0))
+    Ok((label, 0.0))
 }
 
 /// Parse the name and length of a node from a Newick tree string.
@@ -46,10 +46,10 @@ fn parse_label(label: &str) -> Result<(String, u32), ParseError> {
 /// let node_bytes = b"A:0.1";
 /// let (name, bootstrap, length) = parse_node(node_bytes).unwrap();
 /// assert_eq!(name, "A");
-/// assert_eq!(bootstrap, 0);
+/// assert_eq!(bootstrap, 0.0);
 /// assert_eq!(length, 0.1);
 /// ```
-pub fn parse_node(node_bytes: &[u8]) -> Result<(String, u32, f64), ParseError> {
+pub fn parse_node(node_bytes: &[u8]) -> Result<(String, f64, f64), ParseError> {
     let node_str = std::str::from_utf8(node_bytes).expect("UTF-8 sequence");
     // gtdb
     // Check if node_str contains single quotes and ensure they are together
@@ -64,7 +64,7 @@ pub fn parse_node(node_bytes: &[u8]) -> Result<(String, u32, f64), ParseError> {
     if parts.len() == 1 {
         let label = node_str.trim_end_matches(";").to_string();
 
-        return Ok((label, 0, 0.0));
+        return Ok((label, 0.0, 0.0));
     }
 
     let label = parts.get(1).unwrap_or(&"");
