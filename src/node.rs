@@ -22,6 +22,7 @@ pub enum ParseError {
     UnexpectedEndOfInput,
     #[allow(dead_code)]
     InvalidFormat(String),
+    PythonError(String),
 }
 
 impl std::fmt::Display for ParseError {
@@ -29,6 +30,7 @@ impl std::fmt::Display for ParseError {
         match self {
             ParseError::UnexpectedEndOfInput => write!(f, "Unexpected end of input"),
             ParseError::InvalidFormat(msg) => write!(f, "Invalid format: {}", msg),
+            ParseError::PythonError(msg) => write!(f, "Python error: {}", msg),
         }
     }
 }

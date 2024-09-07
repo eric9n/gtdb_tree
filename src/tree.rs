@@ -1,6 +1,26 @@
 use crate::node::{Node, ParseError};
 use memchr::memchr2;
 
+// 修改 NodeParser 枚举以使用 trait 对象
+pub enum NodeParser {
+    Default,
+    Custom(Box<dyn Fn(&str) -> Result<(String, f64, f64), ParseError> + Send>),
+}
+
+impl Default for NodeParser {
+    fn default() -> Self {
+        NodeParser::Default
+    }
+}
+
+/// Parse the label of a node from a Newick tree string.
+///
+/// This function takes a byte slice representing a node in a Newick tree string,
+/// and returns the name and length of the node as a tuple.
+///
+/// # Arguments
+///
+/// * `label` - A string slice representing the node in a Newick tree string.
 fn parse_label(label: &str) -> Result<(String, f64), ParseError> {
     let label = label.trim_end_matches(";").trim_matches('\'').to_string();
 
@@ -31,27 +51,41 @@ fn parse_label(label: &str) -> Result<(String, f64), ParseError> {
 ///
 /// # Arguments
 ///
-/// * `node_bytes` - A byte slice representing the node in a Newick tree string.
+/// * `node_str` - A string slice representing the node in a Newick tree string.
 ///
 /// # Returns
 ///
-/// Returns a `Result` containing a tuple of the name and length on success,
+/// Returns a `Result` containing a tuple of the name, bootstrap, and length on success,
 /// or an `Err(ParseError)` on failure.
 ///
 /// # Example
 ///
 /// ```
-/// use gtdb_tree::tree::parse_node;
+/// use gtdb_tree::tree::parse_node_default;
 ///
-/// let node_bytes = b"A:0.1";
-/// let (name, bootstrap, length) = parse_node(node_bytes).unwrap();
+/// let node_str = "A:0.1";
+/// let (name, bootstrap, length) = parse_node_default(node_str).unwrap();
 /// assert_eq!(name, "A");
 /// assert_eq!(bootstrap, 0.0);
 /// assert_eq!(length, 0.1);
 /// ```
-pub fn parse_node(node_bytes: &[u8]) -> Result<(String, f64, f64), ParseError> {
-    let node_str = std::str::from_utf8(node_bytes).expect("UTF-8 sequence");
-    // gtdb
+pub fn parse_node_default(node_str: &str) -> Result<(String, f64, f64), ParseError> {
+    // 处理 "AD:0.03347[21.0]" 格式
+    if let Some((name_length, bootstrap_str)) = node_str.rsplit_once('[') {
+        if let Some((name, length_str)) = name_length.rsplit_once(':') {
+            let bootstrap = bootstrap_str
+                .trim_end_matches(']')
+                .parse::<f64>()
+                .map_err(|_| {
+                    ParseError::InvalidFormat(format!("Invalid bootstrap value: {}", bootstrap_str))
+                })?;
+            let length = length_str.parse::<f64>().map_err(|_| {
+                ParseError::InvalidFormat(format!("Invalid length value: {}", length_str))
+            })?;
+            return Ok((name.to_string(), bootstrap, length));
+        }
+    }
+
     // Check if node_str contains single quotes and ensure they are together
     if node_str.matches('\'').count() % 2 != 0 {
         return Err(ParseError::InvalidFormat(format!(
@@ -102,12 +136,13 @@ pub fn parse_node(node_bytes: &[u8]) -> Result<(String, f64, f64), ParseError> {
 ///
 /// ```
 /// use gtdb_tree::tree::parse_tree;
+/// use gtdb_tree::tree::NodeParser;
 ///
 /// let newick_str = "((A:0.1,B:0.2):0.3,C:0.4);";
-/// let nodes = parse_tree(newick_str).unwrap();
+/// let nodes = parse_tree(newick_str, NodeParser::default()).unwrap();
 /// assert_eq!(nodes.len(), 5);
 /// ```
-pub fn parse_tree(newick_str: &str) -> Result<Vec<Node>, ParseError> {
+pub fn parse_tree(newick_str: &str, parser: NodeParser) -> Result<Vec<Node>, ParseError> {
     let mut nodes: Vec<Node> = Vec::new();
     let mut pos = 0;
 
@@ -132,7 +167,16 @@ pub fn parse_tree(newick_str: &str) -> Result<Vec<Node>, ParseError> {
                 let end_pos = memchr2(b',', b')', &bytes[pos..]).unwrap_or(bytes_len - pos);
                 let node_end_pos = pos + end_pos;
                 let node_bytes = &bytes[pos..node_end_pos];
-                let (name, bootstrap, length) = parse_node(node_bytes)?;
+
+                let mut node_str = std::str::from_utf8(node_bytes).expect("UTF-8 sequence");
+                if node_end_pos == bytes_len {
+                    node_str = node_str.trim_end_matches(';');
+                }
+                let (name, bootstrap, length) = match &parser {
+                    NodeParser::Default => parse_node_default(node_str)?,
+                    NodeParser::Custom(func) => func(node_str)?,
+                };
+
                 let node_id = if &bytes[pos - 1] == &b')' {
                     stack.pop().unwrap_or(0)
                 } else {
@@ -161,8 +205,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_parse_tree() {
+    fn test_parse_tree() -> Result<(), ParseError> {
         let test_cases = vec![
+            "(A:0.1,B:0.2,(C:0.3,D:0.4)AD:0.03347[21.0]);",
             "((A:0.1,B:0.2)'56:F;H;':0.3,C:0.4);",
             "(,,(,));",                            // no nodes are named
             "(A,B,(C,D));",                        // leaf nodes are named
@@ -175,15 +220,15 @@ mod tests {
         ];
 
         for newick_str in test_cases {
-            match parse_tree(newick_str) {
-                Ok(nodes) => println!(
-                    "Parsed nodes for '{}': {:?}, len: {}",
-                    newick_str,
-                    nodes,
-                    nodes.len()
-                ),
-                Err(e) => println!("Error parsing '{}': {:?}", newick_str, e),
-            }
+            let nodes = parse_tree(newick_str, NodeParser::default())?;
+            println!(
+                "Parsed nodes for '{}': {:?}, len: {}",
+                newick_str,
+                nodes,
+                nodes.len()
+            )
         }
+
+        Ok(())
     }
 }

@@ -13,7 +13,7 @@ Add this crate to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-gtdb_tree = "0.1.0"
+gtdb_tree = "0.1.9"
 ```
 
 ## Usage
@@ -48,3 +48,27 @@ result = gtdb_tree.parse_tree("((A:0.1,B:0.2):0.3,C:0.4);")
 print(result)
 ```
 
+## Advanced Usage
+### Custom Node Parser
+You can provide a custom parser function to handle special node formats:
+
+```python
+import gtdb_tree
+
+def custom_parser(node_str):
+    # Custom parsing logic
+    name, length = node_str.split(':')
+    return name, 100.0, float(length)  # name, bootstrap, length
+
+result = gtdb_tree.parse_tree("((A:0.1,B:0.2):0.3,C:0.4);", custom_parser=custom_parser)
+print(result)
+```
+
+## Working with Node Objects
+## Each Node object in the result has the following attributes:
+
+* id: Unique identifier for the node
+* name: Name of the node
+* bootstrap: Bootstrap value (if available)
+* length: Branch length
+* parent: ID of the parent node
